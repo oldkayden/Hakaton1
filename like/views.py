@@ -3,7 +3,7 @@ from django.shortcuts import render
 from rest_framework import generics, permissions
 from . import serializers
 from .models import Like
-# from post.permissions import IsAuthor
+from posts.permissions import IsAuthor
 
 
 class LikeCreateView(generics.CreateAPIView):

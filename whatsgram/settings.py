@@ -41,8 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     #inst_apps
     'rest_framework',
-    #'rest_framework.authtoken',
-    #'dj_rest_auth',
+    'rest_framework.authtoken',
+    'dj_rest_auth',
     'drf_yasg',
     'django_filters',
     #my_apps
@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     'category',
     'comment',
     'like',
-    'post',
+    'posts',
 ]
 
 MIDDLEWARE = [
@@ -139,3 +139,21 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication'
+    ]
+}
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Token': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'headers',
+        },
+        },
+    'USE_SESSION_AUTH': False,
+}

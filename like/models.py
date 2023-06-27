@@ -1,6 +1,6 @@
 from django.db import models
 
-from post.models import Post
+from posts.models import Post
 
 
 class Like(models.Model):
