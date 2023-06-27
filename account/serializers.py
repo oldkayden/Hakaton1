@@ -1,53 +1,33 @@
-from rest_framework import serializers
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from rest_framework import serializers
+
+User = get_user_model()
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ('password', )
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(
-        min_length=8, write_only=True, required=True)
-    password_confirmation = serializers.CharField(
-        min_length=8, write_only=True, required=True)
-    first_name = serializers.CharField(required=True)
-    last_name = serializers.CharField(required=True)
+    password = serializers.CharField(min_length=8, max_length=20, required=True, write_only=True)
+    password2 = serializers.CharField(min_length=8, max_length=20, required=True, write_only=True)
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name',
-                  'last_name', 'password', 'password_confirmation')
+        fields = ('email', 'password', 'password2', 'first_name', 'last_name', 'avatar', 'username')
 
     def validate(self, attrs):
-        # print(attrs, '!!!!!!!!!!!!')
-        password2 = attrs.pop('password_confirmation')
-        if password2 != attrs['password']:
-            raise serializers.ValidationError(
-                'Password didn\'t match!'
-            )
-        validate_password(attrs['password'])
-
+        password = attrs['password']
+        password2 = attrs.pop('password2')
+        if password2 != password:
+            raise serializers.ValidationError('Passwords didn\'t match')
+        validate_password(password)
         return attrs
 
-    def validate_first_name(self, value):
-        if not value.istitle():
-            raise serializers.ValidationError(
-                'Name must start with uppercase latter!'
-            )
-        return value
-
     def create(self, validated_data):
-        user = User.objects.create(**validated_data)
-        user.set_password(validated_data.get('password'))
-        user.save()
+        user = User.objects.create_user(**validated_data)
         return user
 
-
-class UserListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('id', 'username', 'first_name', 'last_name')
-
-
-class UserDetailSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        exclude = ('password',)
