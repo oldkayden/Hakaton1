@@ -13,3 +13,7 @@ coreapi
 redis
 celery
 django-cors-headers
+python-telegram-bot
+numpy
+pandas
+pyTelegramBotAPI
