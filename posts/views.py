@@ -12,6 +12,7 @@ from . import serializers
 from .permissions import IsAuthor, IsAuthorOrAdmin
 from rest_framework.viewsets import ModelViewSet
 
+
 class StandartResultPagination(PageNumberPagination):
     page_size = 3
     page_query_param = 'page'
