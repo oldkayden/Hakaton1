@@ -1,18 +1,14 @@
-from dj_rest_auth.views import LoginView
 from django.urls import path, include
-# from dj_rest_auth import LoginView
-from account import views
-from rest_framework.routers import DefaultRouter
+from . import views
+from rest_framework.routers import SimpleRouter
 
+from account.views import UserViewSet
 
-router = DefaultRouter()
-router.register('', views.UserViewSet)
+router = SimpleRouter()
+router.register('', UserViewSet)
 
 urlpatterns = [
-    path('register/',  views.UserRegiseterView.as_view()),
-    path('login/', LoginView.as_view()),
-    path('logout/', views.CustomLogout.as_view()),
+    path('login/', views.LoginView.as_view()),
+    path('refresh/', views.RefreshView.as_view()),
     path('', include(router.urls))
-    # path('', views.UserListView.as_view()),
-    # path('<int:pk>/', views.UserListViewDetailView.as_view()),
 ]

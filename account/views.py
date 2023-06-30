@@ -1,49 +1,53 @@
-from dj_rest_auth.views import LogoutView
-from django.contrib.auth.models import User
-from rest_framework import generics, permissions
+from django.contrib.auth import get_user_model
+from django.urls.conf import path
 from rest_framework.decorators import action
-from rest_framework.response import Response
-
-import like.serializers
-from . import serializers
+from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.mixins import RetrieveModelMixin, ListModelMixin
-from like.serializers import FavoriteSerializer
+from rest_framework.mixins import ListModelMixin
+from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
+from account import serializers
+from account.send_mail import send_confirmation_email
+
+# from account.send_mail import
 
 
-class UserRegiseterView(generics.CreateAPIView):
+User = get_user_model()
+
+
+class UserViewSet(ListModelMixin, GenericViewSet):
     queryset = User.objects.all()
-    serializer_class = serializers.RegisterSerializer
+    serializer_class = serializers.UserSerializer
+    permission_classes = (AllowAny,)
+
+    @action(['POST'], detail=False)
+    def register(self, request, *args, **kwargs):
+        serializer = serializers.RegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        if user:
+            try:
+                send_confirmation_email(user.email, user.activation_code)
+            except Exception as e:
+                return Response({'msg': 'Registered, but troubles with email!',
+                                 'data': 'serializer.data'}, status=201)
+            return Response(serializer.data, status=201)
+
+    @action(['GET'], detail=False, url_path='activate/(?P<uuid>[0-9A-Fa-f-]+)')
+    def activate(self, request, uuid):
+        try:
+            user = User.objects.get(activation_code=uuid)
+        except User.DoesNotExist:
+            return Response({'msg': 'Invalid link or link expired!'}, status=400)
+        user.is_active = True
+        user.activation_code=''
+        user.save()
+        return Response({'msg': 'Successfully activated!'}, status=200)
 
 
-class CustomLogout(LogoutView):
-    permission_classes = (permissions.IsAuthenticated,)
+class LoginView(TokenObtainPairView):
+    permission_classes = (AllowAny, )
 
-
-# class UserListView(generics.ListAPIView):
-#     queryset = User.objects.all()
-#     serializer_class = serializers.UserListSerializer
-#     permission_classes = (permissions.IsAuthenticated,)
-#
-#
-# class UserDetailView(generics.RetrieveAPIView):
-#     queryset = User.objects.all()
-#     serializer_class = serializers.UserDetailSerializers
-#     permission_classes = (permissions.IsAuthenticated,)
-
-
-class UserViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
-    queryset = User.objects.all()
-    permission_classes = (permissions.IsAuthenticated, )
-
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return serializers.UserListSerializer()
-        return serializers.UserDetailSerializers()
-
-    @action(['GET'], detail=True)
-    def favorites(self, request, pk):
-        user = self.get_object()
-        fav_post = user.favorites.all()
-        serializer = like.serializers.FavoriteSerializer(fav_post, many=True)
-        return Response(serializer.data, status=200)
+class RefreshView(TokenRefreshView):
+    permission_classes = (AllowAny, )
