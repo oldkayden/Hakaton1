@@ -10,8 +10,8 @@ class CategoryCreateListView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = serializers.CategorySerializer
 
-    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-    #                       permissions.IsAdminUser)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+                          permissions.IsAdminUser)
 
     def get_permissions(self):
         if self.request.method == 'GET':

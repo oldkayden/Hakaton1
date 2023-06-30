@@ -11,6 +11,8 @@ from .models import Post
 from . import serializers
 from .permissions import IsAuthor, IsAuthorOrAdmin
 from rest_framework.viewsets import ModelViewSet
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 
 class StandartResultPagination(PageNumberPagination):
@@ -46,6 +48,7 @@ class PostViewSet(ModelViewSet):
         # но создавать может только залогиненый пользователь
         return [permissions.IsAuthenticatedOrReadOnly(), ]
 
+    @method_decorator(cache_page(60 * 60 * 2))
     @action(['GET'], detail=True)
     def comments(self, request, pk):
         post = self.get_object()
