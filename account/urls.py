@@ -4,11 +4,12 @@ from django.urls import path, include
 from account import views
 from rest_framework.routers import DefaultRouter
 
+
 router = DefaultRouter()
 router.register('', views.UserViewSet)
 
 urlpatterns = [
-    path('register/', views.UserRegiseterView.as_view()),
+    path('register/',  views.UserRegiseterView.as_view()),
     path('login/', LoginView.as_view()),
     path('logout/', views.CustomLogout.as_view()),
     path('', include(router.urls))
