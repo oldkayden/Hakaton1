@@ -16,6 +16,7 @@ from django.contrib.auth.models import User
 from .serializers import ChangePasswordSerializer
 from rest_framework.permissions import IsAuthenticated
 
+
 class ChangePasswordView(generics.UpdateAPIView):
     """
     An endpoint for changing password.
@@ -50,6 +51,7 @@ class ChangePasswordView(generics.UpdateAPIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 # from account.send_mail import
 
 
@@ -81,13 +83,14 @@ class UserViewSet(ListModelMixin, GenericViewSet):
         except User.DoesNotExist:
             return Response({'msg': 'Invalid link or link expired!'}, status=400)
         user.is_active = True
-        user.activation_code=''
+        user.activation_code = ''
         user.save()
         return Response({'msg': 'Successfully activated!'}, status=200)
 
 
 class LoginView(TokenObtainPairView):
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
+
 
 class RefreshView(TokenRefreshView):
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)

@@ -20,7 +20,7 @@ class CustomUser(AbstractUser):
     first_name = models.CharField(_("first name"), max_length=150)
     last_name = models.CharField(_("last name"), max_length=150)
     avatar = models.ImageField(upload_to='avatars', blank=True,
-                               default='avatars/default_avatar.jpg')
+                               default='images/default_avatar.jpg')
     is_active = models.BooleanField(
         _("active"),
         default=False,
