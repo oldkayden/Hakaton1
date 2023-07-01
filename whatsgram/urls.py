@@ -29,6 +29,7 @@ urlpatterns = [
     path('api/v1/posts/', include('posts.urls')),
     path('api/v1/comment/', include('comment.urls')),
     path('api/v1/likes/', include('like.urls')),
+    path('api/v1/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
