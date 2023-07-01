@@ -18,3 +18,4 @@ pyTelegramBotAPI
 beautifulsoup4
 requests
 lxml
+django-rest-passwordreset

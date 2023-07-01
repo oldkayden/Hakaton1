@@ -9,6 +9,48 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from account import serializers
 from account.send_mail import send_confirmation_email
+from rest_framework import status
+from rest_framework import generics
+from rest_framework.response import Response
+from django.contrib.auth.models import User
+from .serializers import ChangePasswordSerializer
+from rest_framework.permissions import IsAuthenticated
+
+
+class ChangePasswordView(generics.UpdateAPIView):
+    """
+    An endpoint for changing password.
+    """
+    serializer_class = ChangePasswordSerializer
+    model = User
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self, queryset=None):
+        obj = self.request.user
+        return obj
+
+    def update(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            # Check old password
+            if not self.object.check_password(serializer.data.get("old_password")):
+                return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+            # set_password also hashes the password that the user will get
+            self.object.set_password(serializer.data.get("new_password"))
+            self.object.save()
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'message': 'Password updated successfully',
+                'data': []
+            }
+
+            return Response(response)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # from account.send_mail import
 
@@ -41,13 +83,14 @@ class UserViewSet(ListModelMixin, GenericViewSet):
         except User.DoesNotExist:
             return Response({'msg': 'Invalid link or link expired!'}, status=400)
         user.is_active = True
-        user.activation_code=''
+        user.activation_code = ''
         user.save()
         return Response({'msg': 'Successfully activated!'}, status=200)
 
 
 class LoginView(TokenObtainPairView):
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
+
 
 class RefreshView(TokenRefreshView):
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
